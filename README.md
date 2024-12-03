@@ -1,0 +1,2 @@
+# SzamArch
+Szamitogep Architekturak alapjai
