@@ -5,9 +5,10 @@ Start:
     mov ax, Code
     mov DS, AX
 
-    mov dl, 100     ;X koordináta 
-    mov dh, 100     ;Y koordináta
+    mov dx, 100     ;X koordináta 
+    mov cx, 100     ;Y koordináta
     push dx
+    push cx
 
     mov ax, 13h
     int 10h
@@ -18,17 +19,16 @@ Start:
     mov si, 34       ;global valtozo a pixel szin valtoztatashoz
 
 Rajz:
-    pop dx          ;dx-ben Y(dh), X(dl) koordináta
-    xor ah, ah
-    mov al, dh      ;ax-ben Y koordináta
+    pop cx          ;cx-ben Y koordináta
+    pop dx          ;dx-ben X koordináta
+    mov ax, cx      ;ax-ben Y koordináta
     push dx         ;dx mentése, mul utasítás felülírja
     mov bx, 320
     mul bx          ;Y koordináta * 320
 
     ;16bites megoldas
-    pop dx          ;dx-ben Y(dh), X(dl) koordináta
+    pop dx          ;dx visszkérése, benne X koordináta
     push dx
-    xor dh, dh    
     add ax, dx
 
 Pixel:
@@ -70,48 +70,44 @@ Szin_reset:
 
 ;szamol és hatart ellenoriz
 Balra:
-    pop dx
-    dec dl
-    cmp dl, 1
+    dec dx
+    cmp dx, 1
     ; jnc Tarol1
     jnc Tarol
-    inc dl
+    inc dx
     jmp Tarol
 ;Tarol1:
 ; push dx
 ; jmp Rajz
 
 Jobbra:
-    pop dx
-    inc dl
-    cmp dl, 200
+    inc dx
+    cmp dx, 320
     ; jc Tarol2
     jc Tarol
-    dec dl
+    dec dx
     jmp Tarol
 ;Tarol2:
 ; push dx
 ; jmp Rajz
 
 Felfele:
-    pop dx
-    dec dh
-    cmp dh, 1
+    dec cx
+    cmp cx, 1
     ; jnc Tarol3
     jnc Tarol
-    inc dh
+    inc cx
     jmp Tarol
 ;Tarol3:
 ; push dx
 ; jmp Rajz
 
 Lefele:
-    pop dx
-    inc dh
-    cmp dh, 200
+    inc cx
+    cmp cx, 200
     ; jc Tarol4
     jc Tarol
-    dec dh
+    dec cx
     jmp Tarol
 ;Tarol4:
 ; push dx
@@ -119,6 +115,7 @@ Lefele:
 
 Tarol:
     push dx
+    push cx
     jmp Rajz
     
 Program_Vege:
