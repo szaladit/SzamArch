@@ -79,19 +79,49 @@ Emeles:
     mov bx, 8
     div bx
 
-    add ax, 30h
+	mov cx, ax
+	cmp cx, 10
+	jl Kiir2
 
+	mov bx, 10
+	div bx
+	mov cx, dx
+
+Kiir1:
+	;pozicional
+	mov ah, 02h
+	mov bh, 0
+	mov dh, 0
+	mov dl, 42
+	int 10h
+
+	add ax, 30h
+    mov dx, ax
+	mov	ah,2
+	int	21h
+
+Kiir2:
     ;pozicional
 	mov ah, 02h
 	mov bh, 0
 	mov dh, 0
-	mov dl, 0
+	mov dl, 43
 	int 10h
 
-    mov dx, offset feladat1
-    mov dx, ax
+	add cx, 30h
+    mov dx, cx
+	mov	ah,2
+	int	21h
 
-	mov	ah,9
+	;pozicional
+	mov ah, 02h
+	mov bh, 0
+	mov dh, 0
+	mov dl, 44
+	int 10h
+
+	mov dx, '!'
+	mov	ah,2
 	int	21h
 
     jmp Elso_vege
@@ -112,13 +142,13 @@ Feladat_2:
 ;===========================================================================
 ; 2. feladat:
 ;
-; Számolja meg az alábbi mondat szavait és írja ki a képernyőre:
+; Szamolja meg az alabbi mondat szavait es irja ki a kepernyore:
 ;
-;	"Az assembly nyelv nem keverendő össze a gépi kóddal!"
+;    "Az assembly nyelv nem keverendo ossze a gepi koddal!"
 ;
-; Feltételezzük, hogy a magyar helyesírási szabályoknak megfelelően a szavak 
-; között mindig 1 szóköz van!
-; Használja a program előre megírt üzenetét (mondat)!
+; Feltetelezzuk, hogy a magyar helyesirasi szabalyoknak megfeleloen a szavak 
+; kozott mindig 1 szokoz van!
+; Hasznalja a program elore megirt uzenetet (mondat)!
 ;
 ; 15 perc, 0 vagy 1 pont
 ;===========================================================================
@@ -160,8 +190,49 @@ Feladat_2:
 ; --------------------------------------------------------------------------
 ; Ide írja a megfelelő programrészt!
 
+	mov	di, offset mondat
+	mov bx, [di] ;just for debug
+	mov bx, 0
+	mov cx, 52
+Vizsgal:
 
+	mov ax, ' '
+	cmp [di], al
+	jz novel
 
+	mov ax, '!'
+	cmp [di], al
+	jz novel
+
+novel_vege:
+
+	inc di
+
+	loop Vizsgal
+
+	push bx
+
+	mov     dh, 3
+	mov     dl, 18
+	xor     bx, bx
+	mov     ah, 02
+	int     10h 
+
+	pop bx
+	xor bh, bh
+	add bx, 30h
+	
+	mov	ah,2
+	mov	dx, bx
+	int	21h
+
+	jmp masodik_vege
+
+novel:
+	inc bx
+	jmp novel_vege
+
+masodik_vege:
 ; Eddig
 ; --------------------------------------------------------------------------
 ; Várakozás billentyű leütésre
@@ -172,9 +243,9 @@ Feladat_2:
 Feladat_3:
 ;===========================================================================
 ; 3. feladat:
-; Döntse el a megnyomott billentyűről, hogy számot, vagy egyéb karaktert
-; "vitt" be! A ciklusból CSAK AZ "ESC" billentyű leütésével lehet kilépni.
-; Használja a program előre megírt üzeneteit (uzenetszam, uzenetnemszam)!
+; Dontse el a megnyomott billentyurol, hogy szamot, vagy egyeb karaktert
+; "vitt" be! A ciklusbol CSAK AZ "ESC" billentyű leutesevel lehet kilepni.
+; Hasznalja a program elore megirt üzeneteit (uzenetszam, uzenetnemszam)!
 ;
 ; 15 perc, 0 vagy 1 pont
 ;===========================================================================
@@ -194,9 +265,69 @@ Feladat_3:
 	
 ; --------------------------------------------------------------------------
 ; Ide írja a megfelelő programrészt!
+Ciklus:
+
+	xor ax, ax
+	int 16h
+
+	push ax
+
+	cmp al, 27
+	jz harmadik_vege
+
+	cmp al, '0'
+	jl Nem_szam
+
+	cmp al, '9'
+	jg Nem_szam
+
+	;kurzort pozicional
+	mov     dh, 1  ;lefele offset
+	mov     dl, 0 ;jobbra offset
+	xor     bx, bx
+	mov     ah, 02
+	int     10h
+
+	;string kiiras:
+	mov	ah,9
+	mov	dx, offset uzenetszam
+	int	21h
+
+	;kurzort pozicional
+	mov     dh, 1  ;lefele offset
+	mov     dl, 24 ;jobbra offset
+	xor     bx, bx
+	mov     ah, 02
+	int     10h
+
+	;Karakter kiiras:
+	pop ax
+	push ax
+	mov	ah,2
+	xor dh, dh
+	mov	dl, al
+	int	21h
+
+Nem_szam_vege:
+	jmp Ciklus
+
+Nem_szam:
+
+	;kurzort pozicional
+	mov     dh, 1  ;lefele offset
+	mov     dl, 0 ;jobbra offset
+	xor     bx, bx
+	mov     ah, 02
+	int     10h
+
+	;string kiiras:
+	mov	ah,9
+	mov	dx, offset uzenetnemszam
+	int	21h
+	jmp Nem_szam_vege
 
 
-
+harmadik_vege:
 ; Eddig
 ; --------------------------------------------------------------------------
 ; Várakozás billentyű leütésre
@@ -213,17 +344,17 @@ Program_Vege:
 
 
 feladat1	    db	"1. feladat: (4^N / 8) fuggveny eredmenye: $" 
-hibas_karakter	db	"Hibás karakter!$"
+hibas_karakter	db	"Hibas karakter!$"
 
 
-feladat2	db	"2. feladat: Szavak száma az alábbi mondatban:$"
-feladat2_1	db	"Szavak száma: $"
-mondat		db	"Az assembly nyelv nem keverendő össze a gépi kóddal!$"
+feladat2	db	"2. feladat: Szavak szama az alabbi mondatban:$"
+feladat2_1	db	"Szavak szama: $"
+mondat		db	"Az assembly nyelv nem keverendo ossze a gepi koddal!$"
 
 
-feladat3	db	"3. feladat: Szám vagy nem szám: $"
-uzenetszam	db	"Számjegy lett leütve!    $"
-uzenetnemszam	db	"Nem számjegy lett leütve!$"
+feladat3	db	"3. feladat: Szam vagy nem szam: $"
+uzenetszam	db	"Szamjegy lett leutve!    $"
+uzenetnemszam	db	"Nem szamjegy lett leutve!$"
 
 
 Code	Ends
